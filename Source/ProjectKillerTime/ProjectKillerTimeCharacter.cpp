@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ProjectKillerTime.h"
+#include "ProjectKillerTimePlayerState.h"
 
 AProjectKillerTimeCharacter::AProjectKillerTimeCharacter()
 {
@@ -131,3 +132,4 @@ void AProjectKillerTimeCharacter::DoJumpEnd()
 	// signal the character to stop jumping
 	StopJumping();
 }
+

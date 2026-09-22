@@ -2,7 +2,27 @@
 
 #include "ProjectKillerTimeGameMode.h"
 
+#include "ProjectKillerTimePlayerState.h"
+
 AProjectKillerTimeGameMode::AProjectKillerTimeGameMode()
 {
-	// stub
+	bDelayedStart = true;
+	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Match Started!"));
+}
+
+void AProjectKillerTimeGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	GetWorldTimerManager().SetTimer(MatchStartDelayTimerHandle, this, &AProjectKillerTimeGameMode::StartMatch,
+	                                MatchStartDelay, false);
+}
+
+void AProjectKillerTimeGameMode::StartMatch()
+{
+}
+
+void AProjectKillerTimeGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
 }

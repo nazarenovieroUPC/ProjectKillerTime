@@ -3,14 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "ProjectKillerTimeGameMode.generated.h"
 
-/**
- *  Simple GameMode for a third person game
- */
 UCLASS(abstract)
-class AProjectKillerTimeGameMode : public AGameModeBase
+class AProjectKillerTimeGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
@@ -18,6 +15,18 @@ public:
 	
 	/** Constructor */
 	AProjectKillerTimeGameMode();
+	
+	virtual void BeginPlay() override;
+	
+	virtual void StartMatch() override;
+	
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	
+	FTimerHandle MatchStartDelayTimerHandle;
+	
+	UPROPERTY(EditDefaultsOnly, Category="GameMode")
+	float MatchStartDelay;
+	
 };
 
 

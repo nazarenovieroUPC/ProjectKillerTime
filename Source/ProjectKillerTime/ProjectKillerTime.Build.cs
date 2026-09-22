@@ -21,7 +21,7 @@ public class ProjectKillerTime : ModuleRules
 			"Slate"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[] { "MultiplayerSessionOW" });
 
 		PublicIncludePaths.AddRange(new string[] {
 			"ProjectKillerTime",
