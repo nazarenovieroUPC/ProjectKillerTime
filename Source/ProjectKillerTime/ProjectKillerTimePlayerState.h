@@ -19,7 +19,8 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_TeamSelected)
 	ETeamType CurrentTeam = ETeamType::None;
 	
-	void SetTeam(ETeamType Team);
+	UFUNCTION(Server, Reliable)
+	void Sever_SetTeam(ETeamType Team);
 	
 	ETeamType GetTeam() const{return CurrentTeam;}
 	

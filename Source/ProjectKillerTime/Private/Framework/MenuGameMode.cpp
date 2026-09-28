@@ -10,6 +10,8 @@ AMenuGameMode::AMenuGameMode()
 {
 	PlayerControllerClass = AMenuPlayerController::StaticClass();
 	DefaultPawnClass = nullptr;
+	
+	bUseSeamlessTravel = true;
 }
 
 void AMenuGameMode::BeginPlay()

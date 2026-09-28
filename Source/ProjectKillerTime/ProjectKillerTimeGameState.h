@@ -10,6 +10,8 @@
 /**
  * 
  */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLobbyTeamsUpdated);
+
 UCLASS()
 class PROJECTKILLERTIME_API AProjectKillerTimeGameState : public AGameState
 {
@@ -26,6 +28,9 @@ public:
 	void SetSurvivorsKilled(int NewSurvivorsKilled);
 	
 	ETeamType GetTeam() const;
+	
+	UPROPERTY(BlueprintAssignable)
+	FOnLobbyTeamsUpdated OnLobbyTeamsUpdated;
 	
 private:
 	int TotalTemples = 0;

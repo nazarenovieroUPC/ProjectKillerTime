@@ -8,6 +8,7 @@
 void AMenuPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+	if (!IsLocalPlayerController()) return;
 	
 	if (!MenuWidgetClass) return;
 	

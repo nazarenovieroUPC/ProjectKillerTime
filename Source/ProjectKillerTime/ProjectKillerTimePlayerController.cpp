@@ -13,6 +13,11 @@ void AProjectKillerTimePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FInputModeGameOnly InputMode;
+	SetInputMode(InputMode);
+	
+	bShowMouseCursor = false;
+	
 	// only spawn touch controls on local player controllers
 	if (IsLocalPlayerController() && ShouldUseTouchControls())
 	{

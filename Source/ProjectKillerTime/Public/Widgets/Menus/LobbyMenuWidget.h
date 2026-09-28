@@ -20,6 +20,8 @@ class PROJECTKILLERTIME_API ULobbyMenuWidget : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	
+	virtual void NativeConstruct() override;
+	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UVerticalBox> SurvivorsTeamList;
 	
@@ -33,10 +35,16 @@ public:
 	TObjectPtr<UButton> JoinKillerTeamButton;
 	
 	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UButton> StartButton;
+	
+	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UButton> BackButton;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MP")
 	TSubclassOf<URowInfoPlayer> RowInfoPlayerClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MP")
+	FString LevelMap;
 	
 	UFUNCTION(BlueprintCallable)
 	void AddPlayerToTeam(ETeamType Team);
@@ -50,6 +58,9 @@ private:
 	
 	UFUNCTION()
 	void OnJoinKillerTeamButtonClicked();
+	
+	UFUNCTION()
+	void OnStartButtonClicked();
 	
 	UFUNCTION()
 	void OnBackButtonClicked();

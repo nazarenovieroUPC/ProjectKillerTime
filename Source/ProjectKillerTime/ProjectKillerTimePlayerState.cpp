@@ -3,46 +3,40 @@
 
 #include "ProjectKillerTimePlayerState.h"
 
+#include "ProjectKillerTimeGameState.h"
 #include "GameFramework/GameStateBase.h"
 #include "Net/UnrealNetwork.h"
 
-void AProjectKillerTimePlayerState::SetTeam(ETeamType Team)
+void AProjectKillerTimePlayerState::Sever_SetTeam_Implementation(ETeamType Team)
 {
-	if (Team == ETeamType::Survivor)
-	{
-		CurrentTeam = Team;
-		return;
-	}
-	
 	if (Team == ETeamType::Killer)
 	{
-		UWorld* World = GetWorld();
-		if (World && World->GetGameState())
+		
+		AProjectKillerTimeGameState* GS = Cast<AProjectKillerTimeGameState>(GetWorld()->GetGameState());
+	
+		if (!GS) return;
+		
+		for (APlayerState* PS : GS->PlayerArray)
 		{
+			AProjectKillerTimePlayerState* PKTPS = Cast<AProjectKillerTimePlayerState>(PS);
 			
-			for (APlayerState* PS : World->GetGameState()->PlayerArray)
-			{
-				AProjectKillerTimePlayerState* PKTPS = Cast<AProjectKillerTimePlayerState>(PS);
-				if (PKTPS)
-				{
-					if (PKTPS && PKTPS != this)
-					{
-						if (PKTPS->GetTeam() == ETeamType::Killer) return;
-					}
-				}
-			}
+			if (PKTPS && PKTPS != this && PKTPS->GetTeam() == ETeamType::Killer) return;
 		}
 	}
 	
+	
 	CurrentTeam = Team;
 	
+	OnRep_TeamSelected();
 }
 
 void AProjectKillerTimePlayerState::OnRep_TeamSelected()
 {
-	
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Team Changed!"));
-	UE_LOG(LogTemp, Warning, TEXT("Team changed on client"))
+	AProjectKillerTimeGameState* GS = Cast<AProjectKillerTimeGameState>(GetWorld()->GetGameState());
+	if (GS)
+	{
+		GS->OnLobbyTeamsUpdated.Broadcast();
+	}
 }
 
 void AProjectKillerTimePlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
