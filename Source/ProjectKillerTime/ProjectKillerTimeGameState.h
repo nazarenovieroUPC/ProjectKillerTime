@@ -18,26 +18,43 @@ class PROJECTKILLERTIME_API AProjectKillerTimeGameState : public AGameState
 	GENERATED_BODY()
 	
 public:
+	AProjectKillerTimeGameState();
 	
-	void SetTotalTemples(int NewTotalTemples);
+	UPROPERTY(BlueprintAssignable)
+	FOnLobbyTeamsUpdated OnLobbyTeamsUpdated;
 	
-	void SetFixedTemples(int NewFixedTemples);
+protected:
+	//Temples
+	UPROPERTY()
+	int TotalTemples = 0;
+	
+	UPROPERTY(ReplicatedUsing = OnRep_ActivatedTemples)
+	int ActivatedTemples = 0;
+	
+	//Survis
+	UPROPERTY()
+	int SurvivorsAlive = 0;
+	
+	UPROPERTY()
+	int SurvivorsKilled = 0;
+	
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	//Setters
+	void SetTotalTemples();
+	
+	void SetActivatedTemples();
 	
 	void SetSurvivorsAlive(int NewSurvivorsAlive);
 	
 	void SetSurvivorsKilled(int NewSurvivorsKilled);
 	
+	//Getters
+	UFUNCTION()
 	ETeamType GetTeam() const;
 	
-	UPROPERTY(BlueprintAssignable)
-	FOnLobbyTeamsUpdated OnLobbyTeamsUpdated;
-	
-private:
-	int TotalTemples = 0;
-	
-	int FixedTemples = 0;
-	
-	int SurvivorsAlive = 0;
-	
-	int SurvivorsKilled = 0;
+	//Replication
+	UFUNCTION()
+	void OnRep_ActivatedTemples();
 };

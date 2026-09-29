@@ -3,6 +3,7 @@
 
 #include "Actors/Temple.h"
 
+#include "ProjectKillerTimeGameState.h"
 #include "Characters/SurvivorCharacter.h"
 #include "Components/BoxComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -36,6 +37,8 @@ void ATemple::BeginPlay()
 		BoxCollision->OnComponentBeginOverlap.AddDynamic(this, &ATemple::OnOverlapBegin);
 		BoxCollision->OnComponentEndOverlap.AddDynamic(this, &ATemple::OnOverlapEnd);
 	}
+	
+	if (AProjectKillerTimeGameState* GS = Cast<AProjectKillerTimeGameState>(GetWorld()->GetGameState())) GS->SetTotalTemples();
 }
 
 //Replicacion
@@ -123,6 +126,8 @@ void ATemple::OnTempleTimer()
 		bIsActivated = true;
 		
 		OnRep_IsActivated();
+		
+		if (AProjectKillerTimeGameState* GS = Cast<AProjectKillerTimeGameState>(GetWorld()->GetGameState())) GS->SetActivatedTemples();
 	}
 }
 

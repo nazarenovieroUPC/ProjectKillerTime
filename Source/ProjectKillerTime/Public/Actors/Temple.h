@@ -33,8 +33,6 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_IsCharging)
 	bool bIsCharging = false;
 	
-	
-	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
