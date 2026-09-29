@@ -22,5 +22,12 @@ class PROJECTKILLERTIME_API IInteractInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	void Interacting();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interact")
+	void Interact(AActor* Interactor);
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interact")
+	void StartedInteract(AActor* Interactor);
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Interact")
+	void CompletedInteract(AActor* Interactor);
 };

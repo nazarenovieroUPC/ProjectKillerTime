@@ -31,6 +31,10 @@ class AProjectKillerTimeCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character")
+	TObjectPtr<AActor> OverlapActor;
+	
 protected:
 
 	/** Jump Input Action */
@@ -48,6 +52,10 @@ protected:
 	/** Mouse Look Input Action */
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
+	
+	/** Interact Input Action */
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* InteractAction;
 
 public:
 
@@ -58,6 +66,10 @@ protected:
 
 	/** Initialize input action bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+	
+	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
 
 protected:
 
@@ -66,6 +78,9 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+	
+	/** Called for interact started input */
+	virtual void InteractStarted(const FInputActionValue& Value);
 
 public:
 

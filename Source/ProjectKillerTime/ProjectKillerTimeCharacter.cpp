@@ -11,7 +11,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ProjectKillerTime.h"
-#include "ProjectKillerTimePlayerState.h"
+
+#include "Interfaces/InteractInterface.h"
 
 AProjectKillerTimeCharacter::AProjectKillerTimeCharacter()
 {
@@ -66,11 +67,28 @@ void AProjectKillerTimeCharacter::SetupPlayerInputComponent(UInputComponent* Pla
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AProjectKillerTimeCharacter::Look);
+		
+		// Interact
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AProjectKillerTimeCharacter::InteractStarted);
 	}
 	else
 	{
 		UE_LOG(LogProjectKillerTime, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+void AProjectKillerTimeCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorBeginOverlap(OtherActor);
+	
+	OverlapActor = OtherActor;
+}
+
+void AProjectKillerTimeCharacter::NotifyActorEndOverlap(AActor* OtherActor)
+{
+	Super::NotifyActorEndOverlap(OtherActor);
+	
+	OverlapActor = nullptr;
 }
 
 void AProjectKillerTimeCharacter::Move(const FInputActionValue& Value)
@@ -89,6 +107,17 @@ void AProjectKillerTimeCharacter::Look(const FInputActionValue& Value)
 
 	// route the input
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
+}
+
+void AProjectKillerTimeCharacter::InteractStarted(const FInputActionValue& Value)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,  TEXT("Interacting"));
+	
+	if (OverlapActor != nullptr && OverlapActor->Implements<UInteractInterface>())
+	{
+		IInteractInterface::Execute_Interact(OverlapActor, this);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,  FString::Printf(TEXT("Interacting with %s"), *OverlapActor->GetName()));
+	}
 }
 
 void AProjectKillerTimeCharacter::DoMove(float Right, float Forward)
