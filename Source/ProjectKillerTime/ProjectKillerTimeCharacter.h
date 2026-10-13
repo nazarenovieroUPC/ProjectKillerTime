@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "ProjectKillerTimeCharacter.generated.h"
 
+class UQuestComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -30,6 +31,10 @@ class AProjectKillerTimeCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
+	UQuestComponent* QuestComponent;
+	
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character")
