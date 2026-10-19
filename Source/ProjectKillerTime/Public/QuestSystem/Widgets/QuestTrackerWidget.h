@@ -16,10 +16,10 @@ UCLASS()
 class PROJECTKILLERTIME_API UQuestTrackerWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 protected:
 	
-	virtual void NativeConstruct() override;
+	virtual void NativeOnInitialized() override;
 	
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Text_QuestName;

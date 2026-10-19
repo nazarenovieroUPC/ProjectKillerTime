@@ -6,7 +6,7 @@
 
 AProjectKillerTimeGameMode::AProjectKillerTimeGameMode()
 {
-	bDelayedStart = true;
+	bDelayedStart = false;
 	
 }
 
@@ -21,8 +21,6 @@ void AProjectKillerTimeGameMode::BeginPlay()
 void AProjectKillerTimeGameMode::StartMatch()
 {
 	Super::StartMatch();
-	
-	if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Match Started!"));
 }
 
 void AProjectKillerTimeGameMode::PostLogin(APlayerController* NewPlayer)

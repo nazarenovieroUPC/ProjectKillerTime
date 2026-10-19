@@ -9,9 +9,9 @@
 #include "QuestSystem/Utilities/PDAQuestDefinition.h"
 #include "QuestSystem/Utilities/STQuestRuntime.h"
 
-void UQuestTrackerWidget::NativeConstruct()
+void UQuestTrackerWidget::NativeOnInitialized()
 {
-	Super::NativeConstruct();
+	Super::NativeOnInitialized();
 	
 	if (APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0))
 	{
@@ -35,7 +35,7 @@ void UQuestTrackerWidget::OnQuestUpdated(FSTQuestRuntime QuestData)
 	
 	FString AllObjectivesText = TEXT("");
     
-	for (const FSTQuestObjective& Objective : QuestData.Objectives)
+	for (FSTQuestObjective& Objective : QuestData.Objectives)
 	{
 		FString ObjLine = FString::Printf(TEXT("- %s: %d / %d \n"), 
 			*Objective.TargetID.ToString(), 
@@ -46,5 +46,7 @@ void UQuestTrackerWidget::OnQuestUpdated(FSTQuestRuntime QuestData)
 	}
 
 	Text_Objectives->SetText(FText::FromString(AllObjectivesText));
+	
+	Text_QuestState->SetText(FText::FromString(QuestData.bIsCompleted ? TEXT("Completado") : TEXT("Activo")));
 }
-}
+

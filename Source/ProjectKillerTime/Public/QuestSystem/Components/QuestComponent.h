@@ -11,7 +11,7 @@ enum class EQuestObjectiveType : uint8;
 class UPDAQuestDefinition;
 struct FSTQuestRuntime;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestUpdateDelegate, FSTQuestRuntime, QuestData)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnQuestUpdateDelegate, FSTQuestRuntime, QuestData);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class PROJECTKILLERTIME_API UQuestComponent : public UActorComponent

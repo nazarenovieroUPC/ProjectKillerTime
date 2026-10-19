@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "ProjectKillerTimeCharacter.generated.h"
 
+class UQuestTrackerWidget;
 class UQuestComponent;
 class USpringArmComponent;
 class UCameraComponent;
@@ -19,7 +20,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
  *  A simple player-controllable third person character
  *  Implements a controllable orbiting camera
  */
-UCLASS(abstract)
+UCLASS()
 class AProjectKillerTimeCharacter : public ACharacter
 {
 	GENERATED_BODY()
@@ -34,7 +35,6 @@ class AProjectKillerTimeCharacter : public ACharacter
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UQuestComponent* QuestComponent;
-	
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character")
@@ -72,9 +72,18 @@ protected:
 	/** Initialize input action bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+	virtual void BeginPlay() override;
+	
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 	
 	virtual void NotifyActorEndOverlap(AActor* OtherActor) override;
+	
+	//Quest Hud
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UUserWidget> QuestWidgetClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TObjectPtr<UUserWidget> QuestWidget;
 
 protected:
 

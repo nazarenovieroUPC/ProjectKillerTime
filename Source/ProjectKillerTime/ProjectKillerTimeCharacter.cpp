@@ -11,9 +11,12 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ProjectKillerTime.h"
+#include "Blueprint/UserWidget.h"
 
 #include "Interfaces/InteractInterface.h"
 #include "QuestSystem/Components/QuestComponent.h"
+#include "QuestSystem/Interfaces/InteractableQuestInterface.h"
+#include "QuestSystem/Widgets/QuestTrackerWidget.h"
 
 AProjectKillerTimeCharacter::AProjectKillerTimeCharacter()
 {
@@ -81,6 +84,20 @@ void AProjectKillerTimeCharacter::SetupPlayerInputComponent(UInputComponent* Pla
 	}
 }
 
+void AProjectKillerTimeCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (QuestWidgetClass)
+	{
+		if ((QuestWidget = CreateWidget<UUserWidget>(GetWorld(), QuestWidgetClass)))
+		{
+			QuestWidget->AddToViewport();
+		}
+	}
+	
+}
+
 void AProjectKillerTimeCharacter::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
@@ -115,12 +132,13 @@ void AProjectKillerTimeCharacter::Look(const FInputActionValue& Value)
 
 void AProjectKillerTimeCharacter::InteractStarted(const FInputActionValue& Value)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,  TEXT("Interacting"));
-	
-	if (OverlapActor != nullptr && OverlapActor->Implements<UInteractInterface>())
+	if (IsValid(OverlapActor) && OverlapActor->Implements<UInteractableQuestInterface>())
 	{
-		IInteractInterface::Execute_Interact(OverlapActor, this);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,  FString::Printf(TEXT("Interacting with %s"), *OverlapActor->GetName()));
+		FString ItemName = OverlapActor->GetName();
+		
+		IInteractableQuestInterface::Execute_InteractQuest(OverlapActor, this);
+		
+		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,  FString::Printf(TEXT("Interacting with %s"), *ItemName));
 	}
 }
 

@@ -13,7 +13,7 @@ UQuestComponent::UQuestComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 }
@@ -26,7 +26,7 @@ void UQuestComponent::BeginPlay()
 
 	// ...
 	
-	if (AQuestGameState* QuestGameState = Cast<AQuestGameState>(GetWorld()->GetAuthGameMode()->GetGameState))
+	if (AQuestGameState* QuestGameState = Cast<AQuestGameState>(GetWorld()->GetGameState()))
 	{
 		QuestGameState->OnGameplayObjectiveEvent.AddDynamic(this, &UQuestComponent::HandleGameplayObjective);
 	}
@@ -49,15 +49,17 @@ bool UQuestComponent::FindQuestByID(FName QuestID, FSTQuestRuntime& QuestData, i
 
 void UQuestComponent::HandleGameplayObjective(EQuestObjectiveType ObjectiveType, FName TargetID, int Amount)
 {
+	if (ActiveQuest.IsEmpty()) return;
+	
 	for (int i = 0; i < ActiveQuest.Num(); ++i)
 	{
-		if (!ActiveQuest[i].bIsActive || ActiveQuest[i].bIsCompleted) return;
+		if (!ActiveQuest[i].bIsActive || ActiveQuest[i].bIsCompleted) continue;
 		
-		for (int j = 0; j < ActiveQuest[i].QuestDefinition->Objectives.Num(); ++j)
+		for (int j = 0; j < ActiveQuest[i].Objectives.Num(); ++j)
 		{
 			if (ActiveQuest[i].Objectives[j].ObjectiveType == ObjectiveType && ActiveQuest[i].Objectives[j].TargetID == TargetID)
 			{
-				UpdateObjectiveProgress(i, j, Amount)
+				UpdateObjectiveProgress(i, j, Amount);
 			}
 		}
 	}
@@ -66,7 +68,7 @@ void UQuestComponent::HandleGameplayObjective(EQuestObjectiveType ObjectiveType,
 void UQuestComponent::UpdateObjectiveProgress(int QuestIndex, int ObjectiveIndex, int Amount)
 {
 	if (!ActiveQuest.IsValidIndex(QuestIndex)) return;
-	if (!ActiveQuest[QuestIndex].QuestDefinition->Objectives.IsValidIndex(ObjectiveIndex)) return;
+	if (!ActiveQuest[QuestIndex].Objectives.IsValidIndex(ObjectiveIndex)) return;
 	
 	FSTQuestObjective& CurrentObjective = ActiveQuest[QuestIndex].Objectives[ObjectiveIndex];
 	
@@ -74,7 +76,9 @@ void UQuestComponent::UpdateObjectiveProgress(int QuestIndex, int ObjectiveIndex
 	
 	CurrentObjective.CurrentAmount = FMath::Clamp(NewAmount, 0, CurrentObjective.RequiredAmount);
 	
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("QuestUpdated")))
+	OnQuestProgressChanged.Broadcast(ActiveQuest[QuestIndex]);
+	
+	CheckQuestCompleted(QuestIndex);
 }
 
 void UQuestComponent::CheckQuestCompleted(int QuestIndex)
@@ -89,7 +93,7 @@ void UQuestComponent::CheckQuestCompleted(int QuestIndex)
 	TargetQuest.bIsCompleted = true;
 	TargetQuest.bIsActive = false;
 	
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Quest Completed")));
+	OnQuestCompleted.Broadcast(TargetQuest);
 }
 
 void UQuestComponent::AddQuest(UPDAQuestDefinition* QuestDefinition)
@@ -99,11 +103,7 @@ void UQuestComponent::AddQuest(UPDAQuestDefinition* QuestDefinition)
 	
 	FSTQuestRuntime DummyQuestData;
 	int32 ExistingIndex = INDEX_NONE;
-	if (FindQuestByID(AddedQuestID, DummyQuestData, ExistingIndex))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Quest %s already exists"), *AddedQuestID.ToString()));
-		return;
-	}
+	if (FindQuestByID(AddedQuestID, DummyQuestData, ExistingIndex)) return;
 	
 	FSTQuestRuntime NewQuestData;
 	
@@ -111,9 +111,11 @@ void UQuestComponent::AddQuest(UPDAQuestDefinition* QuestDefinition)
 	NewQuestData.QuestDefinition = QuestDefinition;
 	NewQuestData.bIsActive = true;
 	NewQuestData.bIsCompleted = false;
+	NewQuestData.Objectives = QuestDefinition->Objectives;
 	
 	ActiveQuest.Add(NewQuestData);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Added Quest %s"), *AddedQuestID.ToString()));
+	
+	OnQuestStarted.Broadcast(NewQuestData);
 }
 
 // Called every frame

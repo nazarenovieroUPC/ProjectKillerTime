@@ -7,6 +7,7 @@
 #include "QuestSystem/Interfaces/InteractableQuestInterface.h"
 #include "QuestGiver.generated.h"
 
+class UBoxComponent;
 class UPDAQuestDefinition;
 
 UCLASS()
@@ -25,7 +26,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UBoxComponent> BoxCollision;
 	
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UStaticMeshComponent> MeshComponent;
 
 public:
 	// Called every frame

@@ -2,6 +2,8 @@
 
 
 #include "QuestSystem/Actors/QuestGiver.h"
+
+#include "Components/BoxComponent.h"
 #include "QuestSystem/Components/QuestComponent.h"
 
 
@@ -10,13 +12,18 @@ AQuestGiver::AQuestGiver()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	SetRootComponent(MeshComponent);
+	
+	BoxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollision"));
+	BoxCollision->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
 void AQuestGiver::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AQuestGiver::InteractQuest_Implementation(AActor* Interactor)
@@ -26,7 +33,6 @@ void AQuestGiver::InteractQuest_Implementation(AActor* Interactor)
 	if (UQuestComponent* QuestComp = Interactor->FindComponentByClass<UQuestComponent>())
 	{
 		QuestComp->AddQuest(QuestDefinition);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Quest Added"));
 	}
 	else
 	{
