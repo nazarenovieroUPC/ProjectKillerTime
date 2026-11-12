@@ -6,7 +6,11 @@
 #include "ProjectKillerTimeGameState.h"
 #include "Characters/SurvivorCharacter.h"
 #include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
+#include "Components/WidgetComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Widgets/ProgressBars/ProgressBarWidget.h"
 
 
 // Sets default values
@@ -25,6 +29,22 @@ ATemple::ATemple()
 	
 	TempleMesh = CreateDefaultSubobject<UStaticMeshComponent>("TempleMesh");
 	TempleMesh->SetupAttachment(BoxCollision);
+	
+	VisibilitySphere = CreateDefaultSubobject<USphereComponent>("VisibilitySphere");
+	VisibilitySphere->SetupAttachment(RootComponent);
+	VisibilitySphere->SetSphereRadius(1000.f);
+	
+	VisibilitySphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	VisibilitySphere->SetCollisionResponseToAllChannels(ECR_Ignore);
+	VisibilitySphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	
+	WidgetProgressBar = CreateDefaultSubobject<UWidgetComponent>("WidgetProgressBar");
+	WidgetProgressBar->SetupAttachment(RootComponent);
+	WidgetProgressBar->SetWidgetSpace(EWidgetSpace::Screen);
+	WidgetProgressBar->SetDrawSize(FVector2D(150.f, 20.f));
+	WidgetProgressBar->SetRelativeLocation(FVector(0.f, 0.f, 150.f));
+	
+	WidgetProgressBar->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -32,11 +52,10 @@ void ATemple::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (BoxCollision)
-	{
-		BoxCollision->OnComponentBeginOverlap.AddDynamic(this, &ATemple::OnOverlapBegin);
-		BoxCollision->OnComponentEndOverlap.AddDynamic(this, &ATemple::OnOverlapEnd);
-	}
+	OnTempleCharge.AddDynamic(this, &ATemple::UpdateProgressBar);
+	
+	VisibilitySphere->OnComponentBeginOverlap.AddDynamic(this, &ATemple::OnVisibilitySphereBeginOverlap);
+	VisibilitySphere->OnComponentEndOverlap.AddDynamic(this, &ATemple::OnVisibilitySphereEndOverlap);
 	
 	if (AProjectKillerTimeGameState* GS = Cast<AProjectKillerTimeGameState>(GetWorld()->GetGameState())) GS->SetTotalTemples();
 }
@@ -48,6 +67,34 @@ void ATemple::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLif
 	
 	DOREPLIFETIME(ATemple, bIsActivated);
 	DOREPLIFETIME(ATemple, bIsCharging);
+	DOREPLIFETIME(ATemple, TempleCharge);
+}
+
+void ATemple::OnVisibilitySphereBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (bIsActivated || !WidgetProgressBar) return;
+
+	if (APawn* PlayerPawn = Cast<APawn>(OtherActor))
+	{
+		if (PlayerPawn->IsLocallyControlled())
+		{
+			WidgetProgressBar->SetVisibility(true);
+			
+			UpdateProgressBar(TempleCharge);
+		}
+	}
+}
+
+void ATemple::OnVisibilitySphereEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (!WidgetProgressBar) return;
+
+	if (APawn* PlayerPawn = Cast<APawn>(OtherActor))
+	{
+		if (PlayerPawn->IsLocallyControlled()) WidgetProgressBar->SetVisibility(false);
+	}
 }
 
 // Called every frame
@@ -66,13 +113,14 @@ void ATemple::StartedInteract_Implementation(AActor* Interactor)
 	bIsCharging = true;
 	
 	OnRep_IsCharging();
+	GetWorldTimerManager().SetTimer(TempleTimerHandle, this, &ATemple::OnTempleTimer, 0.05f, true);
 }
 
 void ATemple::CompletedInteract_Implementation(AActor* Interactor)
 {
 	IInteractInterface::CompletedInteract_Implementation(Interactor);
 	
-	if (bIsActivated) return;
+	if (bIsActivated || !HasAuthority()) return;
 	
 	bIsCharging = false;
 	
@@ -81,51 +129,43 @@ void ATemple::CompletedInteract_Implementation(AActor* Interactor)
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Completed Interact"));
 }
 
-//Overlap box collision
-void ATemple::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-                             UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ATemple::UpdateProgressBar(float ProgressPercent)
 {
-	
-	ASurvivorCharacter* Survivor = Cast<ASurvivorCharacter>(OtherActor);
-	
-	if (!Survivor) return;
-	
-	Survivor->ActualTemple = this;
-	
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Can Interact"));
-	
+	if (!WidgetProgressBar || !WidgetProgressBar->IsVisible()) return;
+    
+	if (UProgressBarWidget* MyWidget = Cast<UProgressBarWidget>(WidgetProgressBar->GetUserWidgetObject()))
+	{
+		MyWidget->SetProgress(ProgressPercent);
+	}
 }
 
-void ATemple::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
+
+void ATemple::ToggleUIProgress(bool bShow)
 {
-	if (OtherActor && OtherActor != this)
+	if (!WidgetProgressBar) return;
+	
+	if (APawn* LocalPlayer = UGameplayStatics::GetPlayerPawn(GetWorld(), 0))
 	{
-		ASurvivorCharacter* Survivor = Cast<ASurvivorCharacter>(OtherActor);
-		if (Survivor)
-		{
-			if(Survivor->ActualTemple == this)
-			{
-				Survivor->ActualTemple = nullptr;
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Can't Interact"));
-			}
-		}
+		float DistanceToBar = FVector::Distance(GetActorLocation(), LocalPlayer->GetActorLocation());
+		
+		WidgetProgressBar->SetVisibility(DistanceToBar <= DistanceToViewBar);
 	}
 }
 
 //Timer
 void ATemple::OnTempleTimer()
 {
-		
-	ChargeCount += 0.05f / ChargeTime;
+	ChargeCount += 0.05f;
 	
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::Printf(TEXT("ChargeCount: %f"), ChargeCount));
+	TempleCharge = ChargeCount / ChargeTime;
+	OnTempleCharge.Broadcast(TempleCharge);
 	
-	if (HasAuthority() && ChargeCount >= MaxChargeCount)
+	if (HasAuthority() && ChargeCount >= ChargeTime)
 	{
 		bIsActivated = true;
 		
 		OnRep_IsActivated();
+		OnRep_IsCharging();
 		
 		if (AProjectKillerTimeGameState* GS = Cast<AProjectKillerTimeGameState>(GetWorld()->GetGameState())) GS->SetActivatedTemples();
 	}
@@ -134,8 +174,6 @@ void ATemple::OnTempleTimer()
 //Replication
 void ATemple::OnRep_IsCharging()
 {
-	if (bIsCharging) GetWorldTimerManager().SetTimer(TempleTimerHandle, this, &ATemple::OnTempleTimer, 0.5, true);
-	
 }
 
 void ATemple::OnRep_IsActivated()
@@ -143,15 +181,24 @@ void ATemple::OnRep_IsActivated()
 	if (bIsActivated)
 	{
 		GetWorldTimerManager().ClearTimer(TempleTimerHandle);
-		
-		ChargeCount = MaxChargeCount;
-		
+		ChargeCount = ChargeTime;
+       
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("MaxChargeCount"));
 		
+		if (WidgetProgressBar)
+		{
+			WidgetProgressBar->SetVisibility(false);
+		}
+       
 		if (TempleMesh && TempleMaterialCharged)
 		{
 			TempleMesh->SetMaterial(0, TempleMaterialCharged);
 			TempleMesh->SetMaterial(3, TempleMaterialCharged);
 		}
 	}
+}
+
+void ATemple::OnRep_TempleCharge()
+{
+	OnTempleCharge.Broadcast(TempleCharge);
 }
