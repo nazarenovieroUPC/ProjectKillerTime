@@ -34,7 +34,7 @@ NetMulticast RPC: Multicast_PlayAnimAttack en AKillerCharacter (Unreliable) -> r
 Cómo probarlo.
 
 Abrir el mapa Lvl_Menu.
-Play en Standalone Game con 2 o más jugadores.
+Play en Standalone Game Standalone Game con Play as Listen Server con 2 o más jugadores.
 Un jugador crea la partida (Host) y el otro se une.
 Cada uno elige equipo y el host presiona Start.
 Probar los dos finales: purificar todos los templos, o dejar que se acabe el tiempo (se puede reducir MatchDuration en el Blueprint del GameMode).
