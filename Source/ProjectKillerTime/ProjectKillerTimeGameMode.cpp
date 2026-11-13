@@ -10,7 +10,7 @@
 AProjectKillerTimeGameMode::AProjectKillerTimeGameMode()
 {
 	bDelayedStart = true;
-	
+	bUseSeamlessTravel = true;
 }
 
 UClass* AProjectKillerTimeGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
