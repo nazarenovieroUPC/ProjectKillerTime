@@ -7,7 +7,29 @@
 #include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
 #include "ProjectKillerTime.h"
+#include "Widgets/MatchResultWidget.h"
+#include "Widgets/HUD/GlobalHudWidget.h"
 #include "Widgets/Input/SVirtualJoystick.h"
+
+void AProjectKillerTimePlayerController::ShowMatchResult(ETeamType WinningTeam)
+{
+	if (!IsLocalPlayerController() || MatchResultWidget || !MatchResultClass) return;
+
+	MatchResultWidget = CreateWidget<UMatchResultWidget>(this, MatchResultClass);
+	if (!MatchResultWidget) return;
+
+	MatchResultWidget->SetWinner(WinningTeam);
+	MatchResultWidget->AddToViewport(100);
+	
+	SetIgnoreMoveInput(true);
+	SetIgnoreLookInput(true);
+
+	FInputModeUIOnly InputMode;
+	InputMode.SetWidgetToFocus(MatchResultWidget->TakeWidget());
+	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	SetInputMode(InputMode);
+	bShowMouseCursor = true;
+}
 
 void AProjectKillerTimePlayerController::BeginPlay()
 {
@@ -17,6 +39,12 @@ void AProjectKillerTimePlayerController::BeginPlay()
 	SetInputMode(InputMode);
 	
 	bShowMouseCursor = false;
+	
+	if (IsLocalPlayerController() && GlobalHudClass)
+	{
+		GlobalHud = CreateWidget<UGlobalHudWidget>(this, GlobalHudClass);
+		if (GlobalHud) GlobalHud->AddToViewport();
+	}
 	
 	// only spawn touch controls on local player controllers
 	if (IsLocalPlayerController() && ShouldUseTouchControls())

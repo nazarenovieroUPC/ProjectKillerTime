@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Utilities/TeamType.h"
 #include "ProjectKillerTimePlayerController.generated.h"
 
+class UMatchResultWidget;
+class UGlobalHudWidget;
 class UInputMappingContext;
 class UUserWidget;
 
@@ -17,9 +20,11 @@ UCLASS(abstract)
 class AProjectKillerTimePlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+public:
+	void ShowMatchResult(ETeamType WinningTeam);
 	
 protected:
-
 	/** Input Mapping Contexts */
 	UPROPERTY(EditAnywhere, Category ="Input|Input Mappings")
 	TArray<UInputMappingContext*> DefaultMappingContexts;
@@ -35,6 +40,19 @@ protected:
 	/** Pointer to the mobile controls widget */
 	UPROPERTY()
 	TObjectPtr<UUserWidget> MobileControlsWidget;
+	
+	//UI
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UGlobalHudWidget> GlobalHudClass;
+
+	UPROPERTY()
+	TObjectPtr<UGlobalHudWidget> GlobalHud;
+	
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UMatchResultWidget> MatchResultClass;
+
+	UPROPERTY()
+	TObjectPtr<UMatchResultWidget> MatchResultWidget;
 
 	/** If true, the player will use UMG touch controls even if not playing on mobile platforms */
 	UPROPERTY(EditAnywhere, Config, Category = "Input|Touch Controls")

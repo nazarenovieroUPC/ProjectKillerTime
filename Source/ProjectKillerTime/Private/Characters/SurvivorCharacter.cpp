@@ -10,7 +10,6 @@
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Net/UnrealNetwork.h"
 #include "Widgets/ProgressBars/ProgressBarWidget.h"
 
 // Sets default values
@@ -81,7 +80,7 @@ void ASurvivorCharacter::ManageHealthChanged(EHealthState NewHealthState)
 			GetMesh()->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 			GetMesh()->SetRelativeLocationAndRotation(FVector(0.f, 0.f, -90.f), FRotator(0.f, -90.f, 0.f));
 			
-			GetCharacterMovement()->MaxWalkSpeed = (NewHealthState == EHealthState::Healthy) ? 600.f : 400.f;
+			GetCharacterMovement()->MaxWalkSpeed = (NewHealthState == EHealthState::Healthy) ? HealthyVelocity : InjuredVelocity;
 		}
 	}
 	
@@ -125,19 +124,6 @@ AActor* ASurvivorCharacter::GetBestInteraction()
 	return BestActor;
 }
 
-// Called to bind functionality to input
-void ASurvivorCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		// Interact
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ASurvivorCharacter::InteractStarted);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &ASurvivorCharacter::InteractCompleted);
-	}
-}
-
 //Overlaps
 void ASurvivorCharacter::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -166,7 +152,8 @@ void ASurvivorCharacter::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 //UI
 void ASurvivorCharacter::UpdateHealBar(float HealPercent)
 {
-	if (!WidgetHealBar && !WidgetHealBar->IsVisible()) return;
+	if (!WidgetHealBar) return;
+	if (!WidgetHealBar->IsVisible()) return;
 	
 	if (APawn* LocalPlayer = UGameplayStatics::GetPlayerPawn(GetWorld(), 0))
 	{
@@ -186,8 +173,6 @@ void ASurvivorCharacter::UpdateHealBar(float HealPercent)
 			WidgetHealBar->SetVisibility(false);
 		}
 	}
-	
-	
 }
 
 void ASurvivorCharacter::ToggleUIHeal(bool bShow)
@@ -257,4 +242,17 @@ void ASurvivorCharacter::Server_InteractCompleted_Implementation(AActor* ActorTo
 	if (!IsValid(ActorToInteract)) return;
 	
 	if (ActorToInteract->Implements<UInteractInterface>()) IInteractInterface::Execute_CompletedInteract(ActorToInteract, this);
+}
+
+// Called to bind functionality to input
+void ASurvivorCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		// Interact
+		//EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &ASurvivorCharacter::InteractStarted);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &ASurvivorCharacter::InteractCompleted);
+	}
 }

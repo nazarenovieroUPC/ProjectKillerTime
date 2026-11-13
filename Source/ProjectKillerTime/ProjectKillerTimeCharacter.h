@@ -7,6 +7,7 @@
 #include "Logging/LogMacros.h"
 #include "ProjectKillerTimeCharacter.generated.h"
 
+class UGlobalHudWidget;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputAction;
@@ -32,11 +33,13 @@ class AProjectKillerTimeCharacter : public ACharacter
 	UCameraComponent* FollowCamera;
 	
 public:
+	/** Constructor */
+	AProjectKillerTimeCharacter();	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Character")
 	TObjectPtr<AActor> OverlapActor;
 	
 protected:
-
 	/** Jump Input Action */
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* JumpAction;
@@ -57,13 +60,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* InteractAction;
 
-public:
-
-	/** Constructor */
-	AProjectKillerTimeCharacter();	
-
 protected:
-
 	/** Initialize input action bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	

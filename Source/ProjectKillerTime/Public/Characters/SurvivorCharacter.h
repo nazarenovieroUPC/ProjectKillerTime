@@ -51,6 +51,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	float DistanceToViewBar = 1000.f;
 	
+	//Velocity
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WalkSpeed")
+	float HealthyVelocity = 575.f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WalkSpeed")
+	float InjuredVelocity = 500.f;
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

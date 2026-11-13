@@ -112,7 +112,18 @@ void ULobbyMenuWidget::OnJoinKillerTeamButtonClicked()
 
 void ULobbyMenuWidget::OnStartButtonClicked()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("Start Game"));
+	if (AProjectKillerTimeGameState* GS = Cast<AProjectKillerTimeGameState>(GetWorld()->GetGameState()))
+	{
+		for (APlayerState* PS : GS->PlayerArray)
+		{
+			const AProjectKillerTimePlayerState* PKTPS = Cast<AProjectKillerTimePlayerState>(PS);
+			if (!PKTPS || PKTPS->GetTeam() == ETeamType::None)
+			{
+				if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, TEXT("Todos los jugadores deben elegir un equipo"));
+				return;
+			}
+		}
+	}
 	
 	GetWorld()->ServerTravel(LevelMap);
 }

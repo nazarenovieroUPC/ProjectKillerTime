@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "DamagerActor.h"
+#include "Actors/DamagerActor.h"
 
 #include "Characters/SurvivorCharacter.h"
 #include "Components/BoxComponent.h"

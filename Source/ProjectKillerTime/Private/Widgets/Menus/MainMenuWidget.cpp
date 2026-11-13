@@ -15,7 +15,7 @@ void UMainMenuWidget::NativeOnInitialized()
 	
 	if (PlayButton) PlayButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnPlayButtonClicked);
 	
-	if (OptionsButton) PlayButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnOptionsButtonClicked);
+	if (OptionsButton) OptionsButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnOptionsButtonClicked);
 	
 	if (QuitButton)QuitButton->OnClicked.AddDynamic(this, &UMainMenuWidget::OnQuitButtonClicked);
 }

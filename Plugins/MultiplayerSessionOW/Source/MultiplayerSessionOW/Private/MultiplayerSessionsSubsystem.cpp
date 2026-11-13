@@ -31,6 +31,7 @@ void UMultiplayerSessionsSubsystem::CrearSesion(int32 NumConexionesPublicas, FSt
 
 		DestruirSesion();
 		// Nota: retornamos aqui? el flujo original no retornaba; se mantiene igual.
+		return;
 	}
 
 	// Guardamos el handle para luego removerlo
@@ -108,7 +109,7 @@ void UMultiplayerSessionsSubsystem::DestruirSesion()
 	}
 
 	DestruirSesionCompletadaHandle = InterfazSesion->AddOnDestroySessionCompleteDelegate_Handle(DestruirSesionCompletadaDelegado);
-
+	
 	if (!InterfazSesion->DestroySession(NAME_GameSession))
 	{
 		InterfazSesion->ClearOnDestroySessionCompleteDelegate_Handle(DestruirSesionCompletadaHandle);
@@ -118,7 +119,7 @@ void UMultiplayerSessionsSubsystem::DestruirSesion()
 
 void UMultiplayerSessionsSubsystem::IniciarSesion()
 {
-	// (vacío, igual que el original)
+	// (vacï¿½o, igual que el original)
 }
 
 bool UMultiplayerSessionsSubsystem::EsValidaInterfazSesion()
@@ -186,5 +187,5 @@ void UMultiplayerSessionsSubsystem::AlDestruirSesionCompletada(FName NombreSesio
 
 void UMultiplayerSessionsSubsystem::AlIniciarSesionCompletada(FName NombreSesion, bool bFueExitoso)
 {
-	// (vacío, igual que el original)
+	// (vacï¿½o, igual que el original)
 }

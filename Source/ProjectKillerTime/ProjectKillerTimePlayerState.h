@@ -28,4 +28,7 @@ public:
 	void OnRep_TeamSelected();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
+protected:
+	virtual void CopyProperties(APlayerState* NewPlayerState) override;
 };

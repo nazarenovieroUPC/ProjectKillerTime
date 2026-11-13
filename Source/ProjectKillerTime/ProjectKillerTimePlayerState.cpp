@@ -45,3 +45,13 @@ void AProjectKillerTimePlayerState::GetLifetimeReplicatedProps(TArray<class FLif
 	
 	DOREPLIFETIME(ThisClass, CurrentTeam);
 }
+
+void AProjectKillerTimePlayerState::CopyProperties(APlayerState* NewPlayerState)
+{
+	Super::CopyProperties(NewPlayerState);
+	
+	if (AProjectKillerTimePlayerState* NewPS = Cast<AProjectKillerTimePlayerState>(NewPlayerState))
+	{
+		NewPS->CurrentTeam = CurrentTeam;
+	}
+}

@@ -64,6 +64,15 @@ bool UMenu::Initialize()
 
 void UMenu::NativeDestruct()
 {
+	if (SubsistemaSesiones)
+	{
+		SubsistemaSesiones->MultijugadorAlCrearSesionCompletada.RemoveAll(this);
+		SubsistemaSesiones->MultijugadorAlBuscarSesionesCompletado.RemoveAll(this);
+		SubsistemaSesiones->MultijugadorAlUnirseASesionCompletado.RemoveAll(this);
+		SubsistemaSesiones->MultijugadorAlDestruirSesionCompletada.RemoveAll(this);
+		SubsistemaSesiones->MultijugadorAlIniciarSesionCompletada.RemoveAll(this);
+	}
+	
 	DesmontarMenu();
 	Super::NativeDestruct();
 }
